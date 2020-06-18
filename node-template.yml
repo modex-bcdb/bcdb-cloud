@@ -1,0 +1,145 @@
+#
+# Copyright (C) 2019, Ingenium Blockchain Technologies - All Rights Reserved
+#
+# Unauthorized copying of this file, via any medium is strictly prohibited
+# Proprietary and confidential
+#
+# -----
+# File: docker-compose.yaml
+# File Created: Friday, 1st June 2020 11:35:03
+# Author: Avasiloae Gabriel (gabriel.avasiloae@modex.tech)
+# -----
+#
+version: "3.5"
+
+networks:
+  default-bcdb-network:
+    name: default_bcdb_network
+    
+volumes:
+  db-data:
+    name: bcdb.db-data
+  rabbitmq-data:
+    name: bcdb.rabbitmq-data
+  core-certificate:
+    name: bcdb.core-certificate
+  dlt-home:
+    name: bcdb.dlt-home
+
+services:
+  mongodb:
+    container_name: mongodb
+    image: mongo:4.1.6
+    logging:
+      driver: none
+    environment: 
+      MONGO_INITDB_ROOT_USERNAME: bcdb
+      MONGO_INITDB_ROOT_PASSWORD: bcdb
+      MONGO_INITDB_DATABASE: "admin"
+    ports:
+      - "28017:27017"
+    volumes:
+      - db-data:/data/db
+    command: "mongod --auth --quiet --dbpath /data/db --bind_ip_all"
+    networks:
+      - default-bcdb-network
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3.8.2-management-alpine
+    logging:
+      driver: none
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq:rw
+    networks:      
+      - default-bcdb-network
+
+  dlt:
+    container_name: dlt
+    image: docker.modex.tech/hyperfiuse.blockchain.t-protocol
+    ports:
+      - "32021-32022:32021-32022"
+    volumes:
+      - dlt-home:/root/.tendermint
+      - core-certificate:/root/.tendermint/certificate
+    entrypoint: start
+    command:
+      --home=/root/.tendermint
+      --p2p.core_tcp_laddr=core:32019
+      --listener_rabbitmq_url=amqp://guest:guest@rabbitmq:5672
+      --listener_rabbitmq_queue=approve_block_txs_queue
+      --moniker=$NODE_NAME
+      --node_type=$NODE_TYPE 
+      --p2p.authorization_node=$DLT_AUTH_NODE 
+      --p2p.core_auth_tcp_laddr=$AUTH_IP:32019 
+      --initial_host=$SEED_IP
+      --peers_p2p_addr=$SEED_IP$PORT_P2P
+      --peers_rpc_addr=$SEED_IP$PORT_RPC
+    networks:
+      - default-bcdb-network
+
+  core:
+    container_name: core
+    image: docker.modex.tech/hyperfiuse.core.${NETWORK}
+    stop_signal: SIGKILL
+    ports:
+      - "9991:39999"
+      - "32018-32020:32018-32020"
+    working_dir: /workspace/bc-${NETWORK}-server
+    volumes:
+      - core-certificate:/workspace/certificate
+    environment:
+      - BCDB_INITIAL_PASSWORD=oz44462AIbE3eUq15sbZvABIYVAHoEDw
+    entrypoint: start-${NETWORK}-node
+    command:
+      -Ddebug.port=39999
+      -Dlog.level=INFO
+      -Ddb.server.uri=mongodb://bcdb:bcdb@mongodb:27017
+      -Ddb.name=NodeDB
+      -Dledger.api.url=ws://dlt:32022/websocket
+      -Dmq.server.uri=amqp://guest:guest@rabbitmq:5672
+      -Dmq.approver.queue.prefix=approve_block_txs_queue
+      -Dlisten.host.addr=0.0.0.0 
+      -Dlisten.http.port=32018
+      -Dlisten.tcp.port=32019
+      -Dlisten.gossip.port=32020
+      -Dexternal.http.api.addr=http://$LOCAL_IP:32018
+      -Dexternal.tcp.api.addr=tcp://$LOCAL_IP:32019
+      -Dexternal.gossip.addr=tcp://$LOCAL_IP:32020
+      -Dnode.type=$NODE_TYPE
+      -Dnode.id=$NODE_NAME
+      -Dgossip.peers=$SEED_IP$PORT_GOSSIP
+    networks:
+      default-bcdb-network:
+        aliases:
+          - core
+
+  authorization-network-configurator:
+    container_name: authorization.network.configurator
+    image: docker.modex.tech/hyperfiuse.node.configurator
+    volumes:
+      - core-certificate:/workspace/certificate
+    environment:
+      - BCDB_INITIAL_PASSWORD=oz44462AIbE3eUq15sbZvABIYVAHoEDw
+    entrypoint: bcdb-importer
+    command: 
+      --directory oauthEntities
+      --host core
+      --node 'HF-auth-01'
+      --node 'HF-auth-02'
+      --node 'HF-data-01'
+      --node 'HF-data-02'
+      --node 'HF-data-03|false'
+      --defaultUser $ADMIN_USER
+      --defaultPass $ADMIN_PASS
+      --systemUser system@ibt.ro
+      --systemPass 123abc
+      --applyNodeLicense
+      oauth
+        --oauthHost core
+        --tokenURL /services/oauth/token
+    networks:
+      - default-bcdb-network

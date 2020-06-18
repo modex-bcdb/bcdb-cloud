@@ -1,0 +1,196 @@
+#!/bin/sh
+#
+# Copyright (C) 2019, Ingenium Blockchain Technologies - All Rights Reserved
+#
+# Unauthorized copying of this file, via any medium is strictly prohibited
+# Proprietary and confidential
+#
+# -----
+# File: docker-compose.yaml
+# File Created: Friday, 17th June 2020 13:21:07
+# Author: Avasiloae Gabriel (gabriel@modex.tech)
+# -----
+#
+# Absolute path to this script, e.g. /home/user/bin/foo.sh
+SCRIPT=$(readlink -f "$0")
+# Absolute path this script is in, thus /home/user/bin
+SCRIPTPATH=$(dirname "$SCRIPT")
+#args
+##to be received from template
+
+
+help() {
+    echo ""
+    echo "#############################################################################################"
+    echo "#      "
+    echo "# Usage: start [options]  "
+    echo "#      "
+    echo "#  Bash script wrapper to start BCDB core instance  "
+    echo "#"
+    echo "#  Options:"
+    echo "#         -Dnode.id [string]                  BCDB Node Name"
+    echo "#         -Dnode.type [string]                BCDB Node Type (initial|peer)"
+    echo "#         -Dnode.license.file <string>        BCDB Node License File"
+    echo "#         -Dcert.directory <string>           BCDB Node Certificate Directory"
+    echo "#"
+    echo "#         -Dauth.tcp.api.addr [string]        BCDB Authorization TCP API Addr"
+    echo "#         -Doauth.service.addr <string>       BCDB OAuth Base URI"
+    echo "#         -Dtoken.url <string>                BCDB Authorization Token URI"
+    echo "#         -Dcheck.license.user [string]       Username for node license access"
+    echo "#         -Dpassword [string]                 Password for node license access"
+    echo "#         -Dclient.id <string>                "
+    echo "#         -Dclient.secret <string>            "
+    echo "#         -Dlog.level <string>                BCDB Log Level (INFO|WARN|ERROR|DEBUG|TRACE)"
+    echo "#         -Dprotocol <string>                 Protocol (http|https)"
+    echo "#         -Dhttps.engine <string>             HTTPS Engine Provider"
+    echo "#         -Dhttps.keystore.path <string>      HTTPS Keystore Path"
+    echo "#         -Dhttps.keystore.type <string>      HTTPS Keystore Type"
+    echo "#         -Dhttps.keystore.password <string>  HTTPS Keystore Password"
+    echo "#         -Dhttps.keystore.algorithm <string> HTTPS Keystore Algorithm"
+    echo "#"
+    echo "#         see the BCDB Documentation for JAVA_OPTS"
+    echo "#"
+    echo "############################################################################################"
+
+    exit 0
+}
+
+for i in "$@"
+do
+case $i in
+    --nodeName=*)
+        arg_node_name="${i#*=}"
+        shift # past argument=value
+    ;;
+    --network=*)
+        arg_network="${i#*=}"
+        shift # past argument=value
+    ;;    
+    --user=*)
+        arg_user="${i#*=}"
+        shift # past argument=value
+    ;;    
+    --pass=*)
+        arg_pass="${i#*=}"
+        shift # past argument=value
+    ;;    
+    --bind=*)
+        bind_ip="${i#*=}"
+        shift # past argument=value
+    ;;
+    --authNode=*)
+        arg_auth_node_ip="${i#*=}"
+        shift # past argument=value
+    ;;
+    --seedNode=*)
+        arg_seed_node_ip="${i#*=}"
+        shift # past argument=value
+    ;;
+    --clean=*)
+        clean_home_dir="${i#*=}"
+        shift # past argument=value
+    ;;
+    --stop=*)
+        stop_services="${i#*=}"
+        shift # past argument=value
+    ;;
+    --registry=*)
+        registry_server_url="${i#*=}"
+        shift # past argument=value
+    ;;
+    --env=*)
+        env_arg="${i#*=}"
+        shift # past argument=value
+    ;;
+    --help*)
+        help
+        shift # past argument=value
+    ;;
+    *)
+        # unknown option
+        #args="$args $i"
+        help
+    ;;
+esac
+done
+
+#const 
+export PORT_HTTP=:32018
+export PORT_TCP=:32019
+export PORT_GOSSIP=:32020
+ 
+export PORT_P2P=:32021
+export PORT_RPC=:32022
+
+
+export ADMIN_USER=$arg_user
+export ADMIN_PASS=$arg_pass
+
+export NETWORK=$arg_network
+export NODE_NAME=$arg_node_name #nodeid, moniker
+
+export AUTH_IP=$arg_auth_node_ip
+export SEED_IP=$arg_seed_node_ip
+
+export LOCAL_IP=
+
+if [ -z $LOCAL_IP ]; then
+    echo "Attempt detecting external interface..."
+    export LOCAL_IP=$(ip route get 8.8.8.8 | awk -v FS=" " '{for (i=0;i<=NF;i++) if ($i == "src") printf $(i+1)"\n"}')
+    echo "Detected external interface ip $LOCAL_IP"
+fi
+
+if [ -z $AUTH_IP ]; then #auth-network
+    export DLT_AUTH_NODE=true
+    export CORE_MODE=auth
+else #data-netowrk
+    export DLT_AUTH_NODE=false
+    export CORE_MODE=data
+
+fi
+
+if [ -z $SEED_IP ]; then #initial node
+  export PORT_HTTP=
+  export PORT_TCP=
+  export PORT_GOSSIP=
+
+  export PORT_P2P=
+  export PORT_RPC=
+
+  export NODE_TYPE=initial
+  if [ -z $AUTH_IP ]; then #auth-network SEED
+    AUTH_IP=core
+  else #PEER
+    export AUTH_IP=$LOCAL_IP
+  fi
+  
+else  #peer node
+  export NODE_TYPE=
+fi
+
+
+echo "[INFO] ------------------------------------------------------------------"
+echo "[INFO]  Environment set used:                                            " 
+echo "[INFO] ------------------------------------------------------------------"
+echo "[INFO] HTTPS          = $HTTPS"
+echo "[INFO]"
+echo "[INFO] admin_user     = $ADMIN_USER"
+echo "[INFO] password       = $ADMIN_PASS"
+echo "[INFO]"
+echo "[INFO] network        = $NETWORK"
+echo "[INFO] node name      = $NODE_NAME"
+echo "[INFO]"
+echo "[INFO] local node     = $LOCAL_IP"
+echo "[INFO] auth node      = $AUTH_IP"
+echo "[INFO] seed node      = $SEED_IP"
+echo "[INFO] ------------------------------------------------------------------"
+echo "[INFO]"
+
+envsubst < $SCRIPTPATH/node-template.yml > $SCRIPTPATH/docker-compose.yml
+
+docker-compose down
+docker-compose up
+
+
+
+

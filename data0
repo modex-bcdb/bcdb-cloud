@@ -18,7 +18,7 @@ SCRIPTPATH=$(dirname "$SCRIPT")
 # chmod +x data0
 
 ./start-node \
- --network=auth \
+ --network=data \
  --nodeName=HF-data-01 \
  --bind= \
  --authNode=10.0.1.4 \

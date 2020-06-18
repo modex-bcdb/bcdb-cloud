@@ -102,6 +102,8 @@ services:
       -Dledger.api.url=ws://dlt:32022/websocket
       -Dmq.server.uri=amqp://guest:guest@rabbitmq:5672
       -Dmq.approver.queue.prefix=approve_block_txs_queue
+      -Dcheck.license.user=$SYSTEM_USER
+      -Dpassword=$SYSTEM_PASS
       -Dlisten.host.addr=0.0.0.0 
       -Dlisten.http.port=32018
       -Dlisten.tcp.port=32019
@@ -135,8 +137,8 @@ services:
       --node 'HF-data-03|false'
       --defaultUser $ADMIN_USER
       --defaultPass $ADMIN_PASS
-      --systemUser system@ibt.ro
-      --systemPass 123abc
+      --systemUser $SYSTEM_USER
+      --systemPass $SYSTEM_PASS
       --applyNodeLicense
       oauth
         --oauthHost core

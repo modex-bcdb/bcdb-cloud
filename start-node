@@ -124,6 +124,9 @@ export PORT_GOSSIP=:32020
 export PORT_P2P=:32021
 export PORT_RPC=:32022
 
+#system user
+export SYSTEM_USER=system@ibt.ro
+export SYSTEM_PASS=123abc
 
 export ADMIN_USER=$arg_user
 export ADMIN_PASS=$arg_pass
@@ -178,6 +181,9 @@ echo "[INFO] HTTPS          = $HTTPS"
 echo "[INFO]"
 echo "[INFO] admin_user     = $ADMIN_USER"
 echo "[INFO] password       = $ADMIN_PASS"
+echo "[INFO]"
+echo "[INFO] system_user    = $SYSTEM_USER"
+echo "[INFO] password       = $SYSTEM_PASS"
 echo "[INFO]"
 echo "[INFO] network        = $NETWORK"
 echo "[INFO] node name      = $NODE_NAME"

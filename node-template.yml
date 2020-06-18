@@ -159,8 +159,8 @@ services:
           --oauthHost $AUTH_IP
           --oauthPort 32019
           --tokenURL /services/oauth/token
-          --user $ADMIN_USER
-          --password $ADMIN_PASS
+          --user $SYSTEM_USER
+          --password $SYSTEM_PASS
           --client_id 0x01
           --client_secret 0x000001
     networks:

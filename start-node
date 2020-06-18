@@ -172,7 +172,10 @@ fi
 
 envsubst < $SCRIPTPATH/node-template.yml > $SCRIPTPATH/docker-compose.yml
 
-docker-compose down
+#docker-compose down
+docker rm -f $(docker ps -aq)
+docker volume ls -f "name=bcdb.*" | xargs docker volume rm -f
+
 export AUTH_INIT=
 export DATA_INIT=
 

@@ -143,3 +143,23 @@ services:
         --tokenURL /services/oauth/token
     networks:
       - default-bcdb-network
+
+  data-network-configurator:
+    container_name: data.network.configurator
+    image: docker.modex.tech/hyperfiuse.node.configurator
+    volumes:
+      - data-01-certificate:/workspace/certificate
+    entrypoint: bcdb-importer
+    command:
+        --host core
+        --port 32019
+        oauth
+          --oauthHost $AUTH_IP
+          --oauthPort 32019
+          --tokenURL /services/oauth/token
+          --user $ADMIN_USER
+          --password $ADMIN_PASS
+          --client_id 0x01
+          --client_secret 0x000001
+    networks:
+      - default-bcdb-network

@@ -157,7 +157,7 @@ services:
         --port 32019
         oauth
           --oauthHost $AUTH_IP
-          --oauthPort 32019
+          --oauthPort 32018
           --tokenURL /services/oauth/token
           --user $ADMIN_USER
           --password $ADMIN_PASS

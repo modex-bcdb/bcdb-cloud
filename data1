@@ -22,7 +22,7 @@ SCRIPTPATH=$(dirname "$SCRIPT")
  --nodeName=HF-data-02 \
  --bind= \
  --authNode=10.0.1.4 \
- --seedNode=10.0.1.5 \
+ --seedNode=10.0.1.6 \
  --user=admin@ibt.ro \
  --pass=123123
  

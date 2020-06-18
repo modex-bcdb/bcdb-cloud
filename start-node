@@ -162,8 +162,8 @@ if [ -z $SEED_IP ]; then #initial node
   export NODE_TYPE=initial
   if [ -z $AUTH_IP ]; then #auth-network SEED
     AUTH_IP=core
-  else #PEER
-    export AUTH_IP=$LOCAL_IP
+#$else #PEER
+#    export AUTH_IP=$LOCAL_IP
   fi
   
 else  #peer node
@@ -199,6 +199,7 @@ echo "[INFO] system_user    = $SYSTEM_USER"
 echo "[INFO] password       = $SYSTEM_PASS"
 echo "[INFO]"
 echo "[INFO] network        = $NETWORK"
+echo "[INFO] node type      = $NODE_TYPE"
 echo "[INFO] node name      = $NODE_NAME"
 echo "[INFO]"
 echo "[INFO] local node     = $LOCAL_IP"

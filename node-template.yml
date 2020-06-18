@@ -148,7 +148,7 @@ services:
     container_name: data.network.configurator
     image: docker.modex.tech/hyperfiuse.node.configurator
     volumes:
-      - data-01-certificate:/workspace/certificate
+      - core-certificate:/workspace/certificate
     entrypoint: bcdb-importer
     command:
         --host core

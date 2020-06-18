@@ -170,6 +170,19 @@ else  #peer node
   export NODE_TYPE=peer
 fi
 
+envsubst < $SCRIPTPATH/node-template.yml > $SCRIPTPATH/docker-compose.yml
+
+docker-compose down
+export AUTH_INIT=
+export DATA_INIT=
+
+if [ -z $SEED_IP ]; then #master node
+   if [ $AUTH_IP = "core" ]; then # master auth node
+     AUTH_INIT=authorization-network-configurator
+   else #master data node
+     DATA_INIT=data-network-configurator
+   fi
+fi
 
 echo "[INFO] ------------------------------------------------------------------"
 echo "[INFO]  Environment set used:                                            " 
@@ -188,25 +201,10 @@ echo "[INFO]"
 echo "[INFO] local node     = $LOCAL_IP"
 echo "[INFO] auth node      = $AUTH_IP"
 echo "[INFO] seed node      = $SEED_IP"
+echo "[INFO]"
+echo "[INFO] auth_init      = $AUTH_INIT"
+echo "[INFO] data_init      = $DATA_INIT"
 echo "[INFO] ------------------------------------------------------------------"
 echo "[INFO]"
 
-envsubst < $SCRIPTPATH/node-template.yml > $SCRIPTPATH/docker-compose.yml
-
-docker-compose down
-export AUTH_INIT=
-export DATA_INIT=
-
-if [ -z $SEED_IP ]; then #master node
-   if [-z $AUTH_IP ]; then # master auth node
-     AUTH_INIT=authorization-network-configurator
-   else #master data node
-     DATA_INIT=data-network-configurator
-   fi
-fi
-
 docker-compose up core dlt mongodb rabbitmq $AUTH_INIT $DATA_INIT
-
-
-
-

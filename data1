@@ -1,0 +1,28 @@
+#!/bin/sh
+#
+# Copyright (C) 2019, Ingenium Blockchain Technologies - All Rights Reserved
+#
+# Unauthorized copying of this file, via any medium is strictly prohibited
+# Proprietary and confidential
+#
+# -----
+# File: docker-compose.yaml
+# File Created: Friday, 17th June 2020 13:21:07
+# Author: Avasiloae Gabriel (gabriel@modex.tech)
+# -----
+#
+# Absolute path to this script, e.g. /home/user/bin/foo.sh
+SCRIPT=$(readlink -f "$0")
+# Absolute path this script is in, thus /home/user/bin
+SCRIPTPATH=$(dirname "$SCRIPT")
+# chmod +x data1
+
+./start-node \
+ --network=auth \
+ --nodeName=HF-data-02 \
+ --bind= \
+ --authNode=10.0.1.4 \
+ --seedNode=10.0.1.5 \
+ --user=admin@ibt.ro \
+ --pass=123123
+ 

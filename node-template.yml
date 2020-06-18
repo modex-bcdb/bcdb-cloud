@@ -75,7 +75,7 @@ services:
       --node_type=$NODE_TYPE 
       --p2p.authorization_node=$DLT_AUTH_NODE 
       --p2p.core_auth_tcp_laddr=$AUTH_IP:32019 
-      --initial_host=$SEED_IP
+      --initial_host=$SEED_IP$PORT_RPC
       --peers_p2p_addr=$SEED_IP$PORT_P2P
       --peers_rpc_addr=$SEED_IP$PORT_RPC
     networks:
@@ -114,10 +114,10 @@ services:
       -Dnode.type=$NODE_TYPE
       -Dnode.id=$NODE_NAME
       -Dgossip.peers=$SEED_IP$PORT_GOSSIP
+      -Dauth.tcp.api.addr=tcp://$AUTH_IP:32019
+      -Doauth.service.addr=http://$AUTH_IP:32018
     networks:
       default-bcdb-network:
-        aliases:
-          - core
 
   authorization-network-configurator:
     container_name: authorization.network.configurator

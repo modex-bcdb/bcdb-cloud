@@ -95,6 +95,7 @@ services:
       - BCDB_INITIAL_PASSWORD=oz44462AIbE3eUq15sbZvABIYVAHoEDw
     entrypoint: start-${NETWORK}-node
     command:
+      -Daccept_eula=true
       -Ddebug.port=39999
       -Dlog.level=INFO
       -Ddb.server.uri=mongodb://bcdb:bcdb@mongodb:27017

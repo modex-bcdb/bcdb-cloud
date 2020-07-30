@@ -59,7 +59,7 @@ services:
 
   dlt:
     container_name: dlt
-    image: docker.modex.tech/hyperfiuse.blockchain.t-protocol
+    image: docker.modex.tech/bcdb.blockchain.t-protocol
     ports:
       - "32021-32022:32021-32022"
     volumes:
@@ -83,7 +83,7 @@ services:
 
   core:
     container_name: core
-    image: docker.modex.tech/hyperfiuse.core.${NETWORK}
+    image: docker.modex.tech/bcdb.core.${NETWORK}
     stop_signal: SIGKILL
     ports:
       - "9991:39999"
@@ -121,7 +121,7 @@ services:
 
   authorization-network-configurator:
     container_name: authorization.network.configurator
-    image: docker.modex.tech/hyperfiuse.node.configurator
+    image: docker.modex.tech/bcdb.node.configurator
     volumes:
       - core-certificate:/workspace/certificate
     environment:
@@ -148,7 +148,7 @@ services:
 
   data-network-configurator:
     container_name: data.network.configurator
-    image: docker.modex.tech/hyperfiuse.node.configurator
+    image: docker.modex.tech/bcdb.node.configurator
     volumes:
       - core-certificate:/workspace/certificate
     entrypoint: bcdb-importer
